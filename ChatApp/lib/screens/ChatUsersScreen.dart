@@ -28,11 +28,11 @@ class _ChatUsersScreenState extends State<ChatUsersScreen> {
     _connectToSocket();
   }
 
-  _connectToSocket() {
+  _connectToSocket() async {
     print(
         'Connecting Logged In User ${G.loggedInUser.name}, ${G.loggedInUser.id}');
     G.initSockect();
-    G.socketUtils.initSocket(G.loggedInUser);
+    await G.socketUtils.initSocket(G.loggedInUser);
     G.socketUtils.connectToSocket();
     G.socketUtils.setOnConnectListner(onConnect);
     G.socketUtils.setOnConnectionErrorListener(onConnectionError);
