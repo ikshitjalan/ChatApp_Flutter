@@ -15,12 +15,65 @@ class ChatUsersScreen extends StatefulWidget {
 class _ChatUsersScreenState extends State<ChatUsersScreen> {
   List<User> _chatUsers;
 
+  bool _connectedToSocket;
+  String _connnectMessage;
   @override
   void initState() {
     super.initState();
+    _connectedToSocket = false;
+    _connnectMessage = 'Connecting...';
     _chatUsers = G.getUsersFor(
       G.loggedInUser,
     );
+    _connectToSocket();
+  }
+
+  _connectToSocket() {
+    print(
+        'Connecting Logged In User ${G.loggedInUser.name}, ${G.loggedInUser.id}');
+    G.initSockect();
+    G.socketUtils.initSocket(G.loggedInUser);
+    G.socketUtils.connectToSocket();
+    G.socketUtils.setOnConnectListner(onConnect);
+    G.socketUtils.setOnConnectionErrorListener(onConnectionError);
+    G.socketUtils.setOnConnectionErrorTimeoutListner(onConnectionTimeout);
+    G.socketUtils.setOnDisconnectListener(onDisconnect);
+    G.socketUtils.setOnErrorListener(onError);
+  }
+
+  onConnect(data) {
+    setState(() {
+      _connectedToSocket = true;
+      _connnectMessage = 'Connected';
+    });
+  }
+
+  onConnectionError(data) {
+    setState(() {
+      _connectedToSocket = false;
+      _connnectMessage = 'Connection Error';
+    });
+  }
+
+  onConnectionTimeout(data) {
+    setState(() {
+      _connectedToSocket = false;
+      _connnectMessage = 'Connection Timeout';
+    });
+  }
+
+  onError(data) {
+    setState(() {
+      _connectedToSocket = false;
+      _connnectMessage = 'Connection Error';
+    });
+  }
+
+  onDisconnect(data) {
+    setState(() {
+      _connectedToSocket = false;
+      _connnectMessage = 'Connection Disconnected';
+    });
   }
 
   _openChatScreen(context) async {
@@ -56,6 +109,9 @@ class _ChatUsersScreenState extends State<ChatUsersScreen> {
         padding: EdgeInsets.all(30.0),
         child: Column(
           children: <Widget>[
+            Text(
+              _connectedToSocket ? 'Connected' : _connnectMessage,
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: _chatUsers.length,
